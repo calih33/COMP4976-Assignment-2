@@ -1,7 +1,7 @@
-# MEMS Assignment #2 — GitHub Copilot Instructions
+# MEMS Assignment #2 — AI Coding Instructions
 
-These instructions guide GitHub Copilot when suggesting code in this repository.
-They describe the **target** architecture for Assignment #2.
+These instructions apply to every AI-assisted change in this repository (GitHub Copilot, and
+Claude Code via `CLAUDE.md`). They describe the **target** architecture for Assignment #2.
 
 ## What this app is
 

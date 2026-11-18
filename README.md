@@ -50,4 +50,4 @@ The Aspire dashboard opens automatically and launches every service.
 
 - NuGet versions are set per project in each `.csproj`.
 - Build artifacts (`bin/`, `obj/`) are git-ignored; `wwwroot/lib/` (Bootstrap) is committed.
-- `.github/copilot-instructions.md` — GitHub Copilot guidance for this repo.
+- `.github/copilot-instructions.md` — AI-assistance rules (shared by Copilot and Claude Code).
