@@ -24,7 +24,7 @@ Tenant data isolation is enforced in the Blazor apps, the WebAPI, **and** the EF
 
 ## Tech stack
 
-- .NET 10 (`net10.0`) — pinned in `global.json`
+- .NET 10 (`net10.0`)
 - .NET Aspire 13.6 orchestration
 - Entity Framework Core 10 — **SQL Server**, Code First, migrations
 - ASP.NET Core Identity (Super Admin + per-tenant Municipality Admins)
@@ -48,12 +48,5 @@ The Aspire dashboard opens automatically and launches every service.
 
 ## Repository conventions
 
-- `Directory.Build.props` — shared compile settings for all projects
-- `Directory.Packages.props` — Central Package Management (all NuGet versions in one file)
-- `.editorconfig` — formatting & C# style
-- `.github/copilot-instructions.md` — AI-assistance rules (shared by Copilot and Claude Code)
+- NuGet versions are set per project in each `.csproj`.
 - Build artifacts (`bin/`, `obj/`) are git-ignored; `wwwroot/lib/` (Bootstrap) is committed.
-
-## Status
-
-See `docs/` for the implementation plan and deficiency-resolution report.
