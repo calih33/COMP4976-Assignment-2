@@ -18,7 +18,7 @@ A multi-tenant, cloud-native re-architecture of the Assignment #1 MVC election a
 
 - .NET 10 (`net10.0`), orchestrated by **.NET Aspire** (13.6)
 - EF Core 10, **SQL Server** (SQLite is NOT permitted), Code First with migrations
-- ASP.NET Core Identity (`IdentityUser`/`IdentityRole`): cookie login for Admin, JWT for the API
+- ASP.NET Core Identity (`ApplicationUser : IdentityUser` with a `MunicipalityId`, `IdentityRole`): cookie login for Admin, JWT for the API
 - Bootstrap 5
 
 ## Solution layout
@@ -39,8 +39,9 @@ A multi-tenant, cloud-native re-architecture of the Assignment #1 MVC election a
 - File-scoped namespaces; PascalCase types/members; `private readonly _camelCase` DI fields.
 - Nullable reference types enabled; don't silence warnings with `!` unless the value is guaranteed.
 - Async all the way: `ToListAsync`, `FirstOrDefaultAsync`, `SaveChangesAsync`.
-- EF Code First: edit the model, then `dotnet ef migrations add <Name> -o Data/Migrations`.
-  Migrations are applied on startup (`context.Database.Migrate()` in a service scope). Never hand-edit a pushed migration.
+- EF Code First: edit the model, then
+  `dotnet ef migrations add <Name> --project MEMS.Data --startup-project MEMS.Api -o Migrations`.
+  The API applies migrations and seeds on startup (`MigrateAsync()` in a service scope). Never hand-edit a pushed migration.
 - Central Package Management: NuGet versions live in `Directory.Packages.props`; `.csproj` files
   reference packages **without** a `Version` attribute.
 - Aspire: apps talk to each other by **service-discovery alias** (e.g. `http://apiservice/`),
@@ -92,3 +93,21 @@ A multi-tenant, cloud-native re-architecture of the Assignment #1 MVC election a
 - Don't persist ballot selections anywhere server-side.
 - Don't add packages without a clear need; prefer what ASP.NET Core / Aspire already provide.
 - Don't catch and swallow exceptions.
+
+## Task guidance
+
+Read the matching file before starting a task. The full design and phase plan is in `docs/a2-plan.md`.
+
+| Task | File |
+|---|---|
+| Admin CRUD pages / services | `.github/skills/scoped-admin-crud/SKILL.md`, prompt `add-admin-crud` |
+| Logo / photo uploads | `.github/skills/image-upload/SKILL.md` |
+| Voting guide, print page | `.github/skills/voting-guide/SKILL.md` |
+| API controllers | `.github/skills/tenant-api/SKILL.md` |
+| Any `.razor` file | `.github/instructions/razor-components.instructions.md` |
+| Schema change | prompt `add-migration` |
+| New tenant seed data | prompt `add-seed-data` |
+| Isolation audit | prompt `review-authorization` |
+| Privacy audit | prompt `review-privacy` |
+
+`docs/a1-reference/` is the Assignment 1 code, kept only as porting reference. It is not compiled; don't edit it.

@@ -1,17 +1,14 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.6.4">
+<Project Sdk="Aspire.AppHost.Sdk/13.6.5">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AspireUseCliBundle>true</AspireUseCliBundle>
+    <UserSecretsId>517da4bb-31d7-4986-b62c-b4a49337e39c</UserSecretsId>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\MEMS.Api\MEMS.Api.csproj" />
     <ProjectReference Include="..\MEMS.Admin\MEMS.Admin.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AspireUseCliBundle>true</AspireUseCliBundle>
-    <UserSecretsId>517da4bb-31d7-4986-b62c-b4a49337e39c</UserSecretsId>
-  </PropertyGroup>
 
 </Project>

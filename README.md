@@ -33,8 +33,9 @@ Tenant data isolation is enforced in the Blazor apps, the WebAPI, **and** the EF
 ## Prerequisites
 
 - .NET 10 SDK (10.0.401+)
-- **Docker Desktop running** (Aspire starts SQL Server in a container — `mcr.microsoft.com/azure-sql-edge`)
-- `dotnet-ef` tool: `dotnet tool install -g dotnet-ef`
+- **Docker Desktop running** (Aspire starts SQL Server in a container; on Apple Silicon enable
+  "Use Rosetta for x86_64/amd64 emulation" in Docker Desktop settings)
+- `dotnet-ef` tool, version 10.x: `dotnet tool install -g dotnet-ef --version 10.*`
 - (optional) Aspire CLI: https://aspire.dev/get-started/install-cli
 
 ## Run
@@ -51,9 +52,13 @@ The Aspire dashboard opens automatically and launches every service.
 - `Directory.Build.props` — shared compile settings for all projects
 - `Directory.Packages.props` — Central Package Management (all NuGet versions in one file)
 - `.editorconfig` — formatting & C# style
-- `.github/copilot-instructions.md` — AI-assistance rules (shared by Copilot and Claude Code)
+- `.github/copilot-instructions.md` — AI-assistance rules (shared by Copilot and Claude Code via `CLAUDE.md`)
+- `.github/skills/`, `.github/prompts/`, `.github/instructions/` — task-specific Copilot guidance
+- `global.json` — pins the .NET 10 SDK
 - Build artifacts (`bin/`, `obj/`) are git-ignored; `wwwroot/lib/` (Bootstrap) is committed.
 
 ## Status
 
-See `docs/` for the implementation plan and deficiency-resolution report.
+- Implementation plan and progress: [`docs/a2-plan.md`](docs/a2-plan.md)
+- Assignment 1 code kept for porting reference (not compiled): [`docs/a1-reference/`](docs/a1-reference/)
+- Deficiency-resolution report: added in Phase 5
