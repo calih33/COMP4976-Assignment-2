@@ -73,10 +73,13 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - See [a1-to-a2-changes.md](a1-to-a2-changes.md) for every A1 → A2 difference.
 
 ### Phase 2 — Aspire wiring (Isaac) · Wed
-- [ ] AppHost: `AddSqlServer("sql").WithDataVolume().AddDatabase("memsdb")`; api/admin/public `WithReference` + `WaitFor`
-- [ ] Api and Admin call `AddServiceDefaults()` / `MapDefaultEndpoints()`; `AddSqlServerDbContext<AppDbContext>("memsdb")`; DB health check
-- [ ] D11 spike: gateway or fallback — decide by end of day
-- [ ] ✅ Checkpoint: `dotnet run --project MEMS.AppHost` shows all resources healthy and a seeded database
+- [x] AppHost: `AddSqlServer("sql").WithDataVolume().AddDatabase("memsdb")`; api/admin/public `WithReference` + `WaitFor`
+- [x] Api and Admin call `AddServiceDefaults()` / `MapDefaultEndpoints()`; `AddDbContext` + `EnrichSqlServerDbContext`
+      (not the pooled `AddSqlServerDbContext`, because `AppDbContext` takes the scoped tenant context); DB health check
+- [x] D11 spike: **gateway works** — YARP on `localhost:5001`: `/api/**` → api, `/admin/**` → admin (path base), `/**` → public.
+      Blazor Server SignalR/WebSockets verified through it. Fallback not needed.
+- [x] ✅ Checkpoint: all resources healthy; migration applied; 4 tenants, 41 candidates, 5 users seeded;
+      DB constraints verified (cross-tenant candidate, bad slug, 0 seats all rejected)
 
 ### Phase 3a — WebAPI (Isaac) · Thu
 - [ ] `api/{tenant}/municipality` (GET/PUT; POST/DELETE at `api/municipalities` Super Admin only)

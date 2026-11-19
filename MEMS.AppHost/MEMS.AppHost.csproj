@@ -7,8 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.SqlServer" />
+    <PackageReference Include="Aspire.Hosting.Yarp" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\MEMS.Api\MEMS.Api.csproj" />
     <ProjectReference Include="..\MEMS.Admin\MEMS.Admin.csproj" />
+    <ProjectReference Include="..\MEMS.Public\MEMS.Public.csproj" />
   </ItemGroup>
 
 </Project>

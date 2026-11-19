@@ -45,7 +45,16 @@ Tenant data isolation is enforced in the Blazor apps, the WebAPI, **and** the EF
 aspire run            # or: dotnet run --project MEMS.AppHost
 ```
 
-The Aspire dashboard opens automatically and launches every service.
+The Aspire dashboard opens automatically and launches every service. The first run downloads the SQL Server
+image (a few minutes). Then browse through the gateway:
+
+| URL | What |
+|---|---|
+| http://localhost:5001/burnaby (or `/surrey`, `/richmond`, `/pitt-meadows`) | Public site for one tenant |
+| http://localhost:5001/admin | Admin site |
+| http://localhost:5001/api/burnaby/candidates | WebAPI |
+
+Seeded admin users (password `P@$$w0rd`): `super` (Super Admin), `burnabyadmin`, `surreyadmin`, `richmondadmin`, `pm`.
 
 ## Repository conventions
 
