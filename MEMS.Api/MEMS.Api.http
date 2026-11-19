@@ -1,6 +1,96 @@
-@MEMS.Api_HostAddress = http://localhost:5253
+# MEMS API requests. Run the solution through MEMS.AppHost first; everything goes through the gateway.
+# Full documentation: docs/api.md · Swagger UI: http://localhost:5001/api/swagger
+@base = http://localhost:5001
 
-# Tenant-scoped endpoints (GET/POST/PUT/DELETE for municipality, positions, candidates)
-# are added in Phase 3a. Example once implemented:
-# GET {{MEMS.Api_HostAddress}}/api/burnaby/candidates
-# Accept: application/json
+### Public: all municipalities (tenant picker)
+GET {{base}}/api/municipalities
+
+### Public: one municipality by slug (case-insensitive)
+GET {{base}}/api/municipalities/Richmond
+
+### Public: Burnaby's positions
+GET {{base}}/api/burnaby/positions
+
+### Public: Burnaby's candidates, searched by name and filtered by position
+GET {{base}}/api/burnaby/candidates?search=wong
+
+### Public: unknown tenant -> 404 ProblemDetails
+GET {{base}}/api/nowhere/candidates
+
+### Sign in as the Burnaby admin
+# @name burnaby
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "burnabyadmin", "password": "P@$$w0rd" }
+
+### Create a position in Burnaby
+# @name newPosition
+POST {{base}}/api/burnaby/positions
+Authorization: Bearer {{burnaby.response.body.$.token}}
+Content-Type: application/json
+
+{ "name": "Park Commissioner", "seatsAvailable": 3 }
+
+### Create a candidate for that position
+# @name newCandidate
+POST {{base}}/api/burnaby/candidates
+Authorization: Bearer {{burnaby.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "name": "Alex Rivera",
+  "profile": "Long-time resident running on transit and parks.",
+  "website": "https://example.com/alex",
+  "email": "alex@example.com",
+  "positionId": {{newPosition.response.body.$.id}}
+}
+
+### Update the candidate
+PUT {{base}}/api/burnaby/candidates/{{newCandidate.response.body.$.id}}
+Authorization: Bearer {{burnaby.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "name": "Alex Rivera-Jones",
+  "profile": "Updated biography.",
+  "positionId": {{newPosition.response.body.$.id}}
+}
+
+### Cross-tenant attempt: Burnaby admin reads Surrey -> 403
+GET {{base}}/api/surrey/candidates
+Authorization: Bearer {{burnaby.response.body.$.token}}
+
+### Delete the candidate
+DELETE {{base}}/api/burnaby/candidates/{{newCandidate.response.body.$.id}}
+Authorization: Bearer {{burnaby.response.body.$.token}}
+
+### Delete the position
+DELETE {{base}}/api/burnaby/positions/{{newPosition.response.body.$.id}}
+Authorization: Bearer {{burnaby.response.body.$.token}}
+
+### Sign in as Super Admin
+# @name super
+POST {{base}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "super", "password": "P@$$w0rd" }
+
+### Super Admin: create a tenant
+# @name newTown
+POST {{base}}/api/municipalities
+Authorization: Bearer {{super.response.body.$.token}}
+Content-Type: application/json
+
+{
+  "name": "Coquitlam",
+  "slug": "coquitlam",
+  "province": "British Columbia",
+  "electionDate": "2026-10-17",
+  "description": "Tri-Cities municipality.",
+  "themeColor": "#336699"
+}
+
+### Super Admin: delete it again
+DELETE {{base}}/api/municipalities/{{newTown.response.body.$.id}}
+Authorization: Bearer {{super.response.body.$.token}}

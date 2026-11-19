@@ -8,9 +8,13 @@ var sql = builder.AddSqlServer("sql")
 
 var db = sql.AddDatabase("memsdb");
 
+// JWT signing key for the API: generated once and kept in the AppHost's user secrets, never committed.
+var jwtKey = builder.AddParameter("jwt-key", new GenerateParameterDefault { MinLength = 64, Special = false }, secret: true, persist: true);
+
 // The API applies migrations and seeds on startup, so everything else waits for it.
 var api = builder.AddProject<Projects.MEMS_Api>("api")
     .WithReference(db)
+    .WithEnvironment("Jwt__Key", jwtKey)
     .WaitFor(db)
     .WithHttpHealthCheck("/health");
 

@@ -82,12 +82,13 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
       DB constraints verified (cross-tenant candidate, bad slug, 0 seats all rejected)
 
 ### Phase 3a — WebAPI
-- [ ] `api/{tenant}/municipality` (GET/PUT; POST/DELETE at `api/municipalities` Super Admin only)
-- [ ] `api/{tenant}/positions` and `api/{tenant}/candidates` — GET, GET by id, POST, PUT, DELETE; candidates support `?search=&positionId=`
-- [ ] `api/{tenant}/images/{id}`, `api/auth/login`
-- [ ] Tenant resolution filter: unknown slug → 404 ProblemDetails; mismatch with token → 403
-- [ ] Swagger UI with XML comments + `[ProducesResponseType]` for request/response/error examples; update `.http` file
-- [ ] `AddProblemDetails()` + `UseExceptionHandler()` — no stack traces to clients
+- [x] `api/municipalities` — GET, GET by id, GET by slug (public); POST/DELETE Super Admin; PUT + logo upload (Super Admin or own tenant)
+- [x] `api/{tenant}/positions` and `api/{tenant}/candidates` — GET, GET by id, POST, PUT, DELETE; candidates support `?search=&positionId=` and photo upload
+- [x] `api/{tenant}/images/{id}`, `api/auth/login` (JWT with role + tenant_id; lockout after 5 failures)
+- [x] Tenant resolution filter: unknown slug → 404 ProblemDetails; mismatch with token → 403
+- [x] Swagger UI at `/api/swagger` with XML comments + `[ProducesResponseType]`; `.http` file; [api.md](api.md)
+- [x] `AddProblemDetails()` + `UseExceptionHandler()` + 409 handler for DB conflicts — no stack traces to clients
+- [x] ✅ `tools/api_smoke_test.py`: 49/49 checks pass (incl. the spec's cross-tenant attacks)
 
 ### Phase 3b — Admin (Blazor Server)
 - [ ] Identity login/logout pages (username login, no registration), `[Authorize]` on all pages

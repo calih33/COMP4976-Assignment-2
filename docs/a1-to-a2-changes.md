@@ -164,3 +164,53 @@ A1 code is in [`docs/a1-reference/`](a1-reference/) (commit `f8b65fa`). Feeds th
   everything else → the public WASM site (`/burnaby`, `/surrey`, ...). Routes point at Aspire resources, not ports.
 - **Benefit:** Matches the spec's URLs (`localhost:5001/burnaby`, `/admin`). Apps find each other through Aspire
   service discovery. The WASM site calls the API on the same origin, so no CORS and no API URL baked into the client.
+
+---
+
+## Phase 3a — WebAPI
+
+### Read-only, global API → tenant-scoped API with full CRUD
+- **A1:** `/api/municipalities`, `/api/positions`, `/api/candidates` were GET-only and returned every municipality's
+  data, filtered by optional `?municipalityId=` query strings.
+- **A2:** Tenant-owned routes include the slug (`/api/burnaby/candidates`). GET, GET by id, POST, PUT and DELETE for
+  municipalities, positions and candidates, plus logo/photo upload and image serving.
+- **Benefit:** Required by A2. The tenant is part of the address, so a client can't get another tenant's rows by
+  changing a query parameter; and future clients can manage data, not just read it.
+
+### Tenant validated in the API layer, not just the UI
+- **A1:** The API had no tenant concept; admin restrictions existed only in the MVC admin controllers.
+- **A2:** `TenantContextFilter` runs before every action: unknown slug → 404; a Municipality Admin token used on
+  another tenant's route → 403 (logged as a warning). It then sets the tenant context, so the EF query filters and the
+  service checks apply to everything the action does. A record id from another tenant returns 404.
+- **Benefit:** The spec's examples hold even when calling the API directly: a Burnaby admin can't read or change Surrey
+  data. Verified by `tools/api_smoke_test.py`.
+
+### JWT for mobile users → JWT for admins, with role and tenant
+- **A1:** JWT existed only for COMP4977 mobile users (`api/auth/register`, no roles); signing key in
+  `appsettings.Development.json`.
+- **A2:** `POST /api/auth/login` issues JWTs to admin accounts only, carrying `role` and `tenant_id`. Same message for
+  unknown user and wrong password; lockout after 5 failures. Public registration removed. The signing key is a
+  generated Aspire secret parameter (user secrets), never in a config file.
+- **Benefit:** API writes are restricted to admins of the right tenant without a database lookup per request, and no
+  secret can be committed.
+
+### Entities/ad-hoc DTOs → shared DTOs in `MEMS.Shared`
+- **A1:** DTOs lived in the MVC project (`Models/Api`) and used COMP4977 field names.
+- **A2:** Request/response records in `MEMS.Shared` with the same validation attributes as the models; the WASM site
+  will reuse them. Image URLs point to the tenant-scoped image endpoint.
+- **Benefit:** One contract shared by server and client; the public site can't drift from what the API returns.
+
+### Error handling → ProblemDetails everywhere
+- **A1:** API errors used `Problem(...)` in some actions; unhandled exceptions used the MVC error page.
+- **A2:** `AddProblemDetails` + `UseExceptionHandler` + `UseStatusCodePages`: every error (400/401/403/404/409/500) is
+  RFC 7807 JSON with a `traceId`. A dedicated handler turns database constraint races into 409. No stack traces or
+  SQL messages are returned. `X-Content-Type-Options: nosniff` on every response.
+- **Benefit:** Required by A2 (global exception handling, no sensitive info). Clients get one predictable error format,
+  and the `traceId` links an error to its trace in the Aspire dashboard.
+
+### Markdown endpoint list → Swagger/OpenAPI + documentation
+- **A1:** `docs/api-endpoints.md` written by hand.
+- **A2:** .NET 10 OpenAPI document generated from XML comments and `[ProducesResponseType]`, Swagger UI with a JWT
+  "Authorize" button at `/api/swagger`, `docs/api.md` with request/response/error examples taken from real responses,
+  and a runnable `.http` file.
+- **Benefit:** Meets the API documentation requirement, and the docs come from the code, so they stay accurate.

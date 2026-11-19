@@ -6,6 +6,10 @@ description: How MEMS.Api controllers are built - tenant slug in every route, pu
 # Tenant-scoped WebAPI
 
 Replaces A1's `mobile-api` skill. The API serves the Blazor WASM public site and future clients.
+Endpoint reference: `docs/api.md`. After changing anything, run `python3 -I tools/api_smoke_test.py` (AppHost running).
+
+Key files: `Tenancy/TenantContextFilter.cs` (slug → tenant context, cross-tenant 403), `Controllers/ApiControllerBase.cs`
+(`Failure(ServiceResult)` → ProblemDetails), `Infrastructure/DtoMapper.cs`, `Auth/JwtTokenService.cs`.
 
 ## Routes
 
@@ -15,9 +19,9 @@ ProblemDetails before the action runs.
 
 | Resource | Endpoints |
 |---|---|
-| Municipality | `GET api/municipalities` (public list for the picker), `POST api/municipalities` / `DELETE api/municipalities/{id}` (Super Admin), `GET/PUT api/{tenant}/municipality` |
+| Municipality | `GET api/municipalities`, `GET api/municipalities/{id}`, `GET api/municipalities/{slug}` (public); `POST` / `DELETE api/municipalities/{id}` (Super Admin); `PUT api/municipalities/{id}` and `PUT/DELETE .../{id}/logo` (Super Admin or that tenant's admin) |
 | Positions | `GET`, `GET {id}`, `POST`, `PUT {id}`, `DELETE {id}` under `api/{tenant}/positions` |
-| Candidates | same, under `api/{tenant}/candidates`; `GET` supports `?search=&positionId=` |
+| Candidates | same, under `api/{tenant}/candidates`; `GET` supports `?search=&positionId=`; `PUT/DELETE {id}/photo` (multipart `file`) |
 | Images | `GET api/{tenant}/images/{id}` |
 | Auth | `POST api/auth/login` → JWT |
 

@@ -17,6 +17,9 @@ public interface IMunicipalityService
     /// <summary>Tenant resolution from a URL slug (case-insensitive). Ignores tenant filters; read-only.</summary>
     Task<Municipality?> FindBySlugAsync(string slug, CancellationToken ct = default);
 
+    /// <summary>Public details of any tenant by id (read-only, no positions/candidates). Ignores tenant filters.</summary>
+    Task<Municipality?> FindByIdAsync(int id, CancellationToken ct = default);
+
     /// <summary>Every tenant, for the public municipality picker. Read-only, no positions/candidates.</summary>
     Task<IReadOnlyList<Municipality>> ListAllTenantsAsync(CancellationToken ct = default);
 
@@ -58,6 +61,15 @@ public sealed class MunicipalityService(AppDbContextFactory factory, ITenantCont
             .IgnoreQueryFilters()
             .AsNoTracking()
             .FirstOrDefaultAsync(m => m.Slug == normalized, ct);
+    }
+
+    public async Task<Municipality?> FindByIdAsync(int id, CancellationToken ct = default)
+    {
+        await using var db = factory.Create();
+        return await db.Municipalities
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(m => m.MunicipalityId == id, ct);
     }
 
     public async Task<IReadOnlyList<Municipality>> ListAllTenantsAsync(CancellationToken ct = default)
