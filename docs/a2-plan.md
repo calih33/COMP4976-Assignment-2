@@ -53,7 +53,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 
 ## Phases
 
-### Phase 0 — Repo setup (Isaac, ~1 h) · Wed
+### Phase 0 — Repo setup
 - [x] Work on feature branches in this repo; merge to `main` via PR (Phase 0 is on `phase-0-setup`)
 - [x] Add `global.json` (10.0.100, `latestFeature`), `Directory.Build.props`, `Directory.Packages.props` (central versions), `.editorconfig`
 - [x] Import A1 code (`git archive f8b65fa`) into `docs/a1-reference/` — not compiled, so the build stays green;
@@ -63,7 +63,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [x] Bump Aspire to 13.6.5 (fixes CVE-2026-120006 in < 13.6.5)
 - [x] Remove template Weather/Counter pages, `WeatherForecastController`, empty `Class1.cs` files
 
-### Phase 1 — Data layer (Isaac) · Wed
+### Phase 1 — Data layer
 - [x] Models per diagram above; remove `SavedCandidate`, `AdminRoleName`
 - [x] `AppDbContext : IdentityDbContext<ApplicationUser>` with SQL Server, constraints, unique indexes, global tenant filter
 - [x] Fresh `InitialCreate` migration for SQL Server (drop the SQLite migrations); drop `ToLower()` search hacks
@@ -72,7 +72,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [x] Services + `ITenantContext` (port `MunicipalityAccessService` logic); `ImageService` (port `CheckImage`)
 - See [a1-to-a2-changes.md](a1-to-a2-changes.md) for every A1 → A2 difference.
 
-### Phase 2 — Aspire wiring (Isaac) · Wed
+### Phase 2 — Aspire wiring
 - [x] AppHost: `AddSqlServer("sql").WithDataVolume().AddDatabase("memsdb")`; api/admin/public `WithReference` + `WaitFor`
 - [x] Api and Admin call `AddServiceDefaults()` / `MapDefaultEndpoints()`; `AddDbContext` + `EnrichSqlServerDbContext`
       (not the pooled `AddSqlServerDbContext`, because `AppDbContext` takes the scoped tenant context); DB health check
@@ -81,7 +81,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [x] ✅ Checkpoint: all resources healthy; migration applied; 4 tenants, 41 candidates, 5 users seeded;
       DB constraints verified (cross-tenant candidate, bad slug, 0 seats all rejected)
 
-### Phase 3a — WebAPI (Isaac) · Thu
+### Phase 3a — WebAPI
 - [ ] `api/{tenant}/municipality` (GET/PUT; POST/DELETE at `api/municipalities` Super Admin only)
 - [ ] `api/{tenant}/positions` and `api/{tenant}/candidates` — GET, GET by id, POST, PUT, DELETE; candidates support `?search=&positionId=`
 - [ ] `api/{tenant}/images/{id}`, `api/auth/login`
@@ -89,7 +89,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [ ] Swagger UI with XML comments + `[ProducesResponseType]` for request/response/error examples; update `.http` file
 - [ ] `AddProblemDetails()` + `UseExceptionHandler()` — no stack traces to clients
 
-### Phase 3b — Admin (Blazor Server) (Cali) · Thu
+### Phase 3b — Admin (Blazor Server)
 - [ ] Identity login/logout pages (username login, no registration), `[Authorize]` on all pages
 - [ ] Dashboard: totals of municipalities / positions / candidates (scoped to tenant for Municipality Admin)
 - [ ] Tenant management (Super Admin): create / edit / delete, set slug, logo upload, theme color
@@ -98,14 +98,14 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [ ] Municipality Admin: tenant fixed to their own; every save re-checks on the server (port A1's `CanManage` checks)
 - [ ] Bootstrap layout from A1 (colours, navbar, dark mode)
 
-### Phase 3c — Public (Blazor WASM) (Cali) · Thu
+### Phase 3c — Public (Blazor WASM)
 - [ ] `/` — municipality picker (browse municipalities)
 - [ ] `/{tenant}` — home with logo, description, election date, theme color
 - [ ] `/{tenant}/positions`, `/{tenant}/candidates` (search by name, filter by position), `/{tenant}/candidates/{id}` with photo
 - [ ] Unknown slug → friendly "municipality not found" page
 - [ ] Typed `ApiClient` in WASM; all data via API only
 
-### Phase 4 — Privacy + quality (both) · Fri morning
+### Phase 4 — Privacy + quality
 - [ ] `GuideStorage` service over `sessionStorage` (add / remove / clear / list); "Add to guide" buttons; `/{tenant}/guide`
 - [ ] `/{tenant}/guide/print`: municipality, election date, candidate names, positions, print date; print CSS
 - [ ] Verify: no ballot data in DB tables, no guide IDs in API requests (browser Network tab), guide gone after closing the tab
@@ -113,7 +113,7 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [ ] Cross-tenant tests: `burnabyadmin` token → `GET/PUT /api/surrey/...` = 403; Admin pages with another tenant's id = forbidden
 - [ ] Responsive check on mobile widths
 
-### Phase 5 — Docs + submission (both) · Fri afternoon
+### Phase 5 — Docs + submission
 - [ ] Architecture diagram (Admin, gateway/routing, 3 tenant WASM experiences, API, SQL Server, Aspire; tenant isolation for Burnaby/Surrey/Richmond)
 - [ ] Updated ERD
 - [ ] **Deficiency Resolution Report** (Issue / Original Problem / Resolution) — needs the instructor's A1 feedback
@@ -133,7 +133,7 @@ Based on A1 (Isaac did data/identity/access, Cali did public site and admin view
 - **Cali:** Phases 3b, 3c, guide/print, UI polish, screenshots
 - **Both:** deficiency report, Copilot doc, final review
 
-Phase 3a/3b/3c can run in parallel once the Phase 2 checkpoint passes — that's the critical path, so it must land Wednesday.
+Phase 3a/3b/3c can run in parallel once the Phase 2 checkpoint passes.
 
 ## Open items
 
