@@ -64,12 +64,13 @@ Domain classes in `MEMS` have no ASP.NET dependency (no `IFormFile`). DTOs with 
 - [x] Remove template Weather/Counter pages, `WeatherForecastController`, empty `Class1.cs` files
 
 ### Phase 1 — Data layer (Isaac) · Wed
-- [ ] Models per diagram above; remove `SavedCandidate`, `AdminRoleName`
-- [ ] `AppDbContext : IdentityDbContext<ApplicationUser>` with SQL Server, constraints, unique indexes, global tenant filter
-- [ ] Fresh `InitialCreate` migration for SQL Server (drop the SQLite migrations); drop `ToLower()` search hacks
-- [ ] Seed: **Burnaby, Surrey, Richmond, Pitt Meadows** (Pitt Meadows keeps `pm` working), Mayor/Councillor/School Trustee each,
-      **≥ 20 candidates** (reuse A1 names), users `super`, `pm`, `burnabyadmin`, `surreyadmin`, `richmondadmin` — password `P@$$w0rd`
-- [ ] Services + `ITenantContext` (port `MunicipalityAccessService` logic); `ImageService` (port `CheckImage`)
+- [x] Models per diagram above; remove `SavedCandidate`, `AdminRoleName`
+- [x] `AppDbContext : IdentityDbContext<ApplicationUser>` with SQL Server, constraints, unique indexes, global tenant filter
+- [x] Fresh `InitialCreate` migration for SQL Server (drop the SQLite migrations); drop `ToLower()` search hacks
+- [x] Seed: **Burnaby, Surrey, Richmond, Pitt Meadows** (Pitt Meadows keeps `pm` working), Mayor/Councillor/School Trustee each,
+      **41 candidates** (reuse A1 names), users `super`, `pm`, `burnabyadmin`, `surreyadmin`, `richmondadmin` — password `P@$$w0rd`
+- [x] Services + `ITenantContext` (port `MunicipalityAccessService` logic); `ImageService` (port `CheckImage`)
+- See [a1-to-a2-changes.md](a1-to-a2-changes.md) for every A1 → A2 difference.
 
 ### Phase 2 — Aspire wiring (Isaac) · Wed
 - [ ] AppHost: `AddSqlServer("sql").WithDataVolume().AddDatabase("memsdb")`; api/admin/public `WithReference` + `WaitFor`
