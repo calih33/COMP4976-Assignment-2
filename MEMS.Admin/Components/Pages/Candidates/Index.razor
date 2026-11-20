@@ -1,0 +1,73 @@
+@page "/candidates"
+@attribute [Authorize]
+@inject ICandidateService Candidates
+@inject IPositionService Positions
+
+<PageTitle>Candidates - MEMS Admin</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Candidates</h1>
+    <a class="btn btn-primary" href="candidates/create">New candidate</a>
+</div>
+
+<div class="row g-2 mb-3">
+    <div class="col-sm-5">
+        <input class="form-control" placeholder="Search by name" @bind="_search" />
+    </div>
+    <div class="col-sm-4">
+        <select class="form-select" @bind="_positionFilter">
+            <option value="0">All positions</option>
+            @foreach (var p in _positions)
+            {
+                <option value="@p.PositionId">@p.Municipality!.Name — @p.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-sm-3 d-grid">
+        <button class="btn btn-outline-primary" @onclick="ApplyAsync">Search</button>
+    </div>
+</div>
+
+@if (_items is null)
+{
+    <p>Loading...</p>
+}
+else if (_items.Count == 0)
+{
+    <p>No candidates found.</p>
+}
+else
+{
+    <QuickGrid Items="@_items.AsQueryable()" Pagination="@_pagination" class="table table-striped">
+        <PropertyColumn Property="@(c => c.Municipality!.Name)" Title="Municipality" Sortable="true" />
+        <PropertyColumn Property="@(c => c.Position!.Name)" Title="Position" Sortable="true" />
+        <PropertyColumn Property="@(c => c.Name)" Title="Candidate" Sortable="true" />
+        <TemplateColumn Title="Actions">
+            <a class="btn btn-sm btn-outline-secondary" href="@($"candidates/{context.CandidateId}")">Details</a>
+            <a class="btn btn-sm btn-outline-primary" href="@($"candidates/{context.CandidateId}/edit")">Edit</a>
+            <a class="btn btn-sm btn-outline-danger" href="@($"candidates/{context.CandidateId}/delete")">Delete</a>
+        </TemplateColumn>
+    </QuickGrid>
+    <Paginator State="@_pagination" />
+}
+
+@code {
+    private IReadOnlyList<Candidate>? _items;
+    private IReadOnlyList<Position> _positions = [];
+    private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
+    private string _search = string.Empty;
+    private int _positionFilter;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _positions = await Positions.ListAsync();
+        await ApplyAsync();
+    }
+
+    private async Task ApplyAsync()
+    {
+        _items = await Candidates.ListAsync(
+            string.IsNullOrWhiteSpace(_search) ? null : _search,
+            _positionFilter == 0 ? null : _positionFilter);
+    }
+}

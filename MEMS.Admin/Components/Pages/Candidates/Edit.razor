@@ -1,0 +1,137 @@
+@page "/candidates/{Id:int}/edit"
+@attribute [Authorize]
+@inject ICandidateService Candidates
+@inject IPositionService Positions
+@inject NavigationManager Nav
+
+<PageTitle>Edit Candidate - MEMS Admin</PageTitle>
+
+@if (_loaded && _model is null)
+{
+    <h1>Edit Candidate</h1>
+    <p>Candidate not found.</p>
+    <a class="btn btn-secondary" href="candidates">Back</a>
+}
+else if (_model is not null)
+{
+    <h1>Edit @_model.Name</h1>
+
+    @if (_errors.Count > 0)
+    {
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach (var error in _errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <EditForm Model="_model" OnValidSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label class="form-label">Position</label>
+            <InputSelect @bind-Value="_model.PositionId" class="form-select">
+                <option value="0">Choose a position...</option>
+                @foreach (var p in _positions)
+                {
+                    <option value="@p.PositionId">@p.Municipality!.Name — @p.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => _model.PositionId" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Candidate Name</label>
+            <InputText @bind-Value="_model.Name" class="form-control" />
+            <ValidationMessage For="() => _model.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Biography</label>
+            <InputTextArea @bind-Value="_model.Profile" class="form-control" rows="4" />
+            <ValidationMessage For="() => _model.Profile" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Website URL</label>
+            <InputText @bind-Value="_model.Website" class="form-control" />
+            <ValidationMessage For="() => _model.Website" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email Address</label>
+            <InputText @bind-Value="_model.Email" class="form-control" />
+            <ValidationMessage For="() => _model.Email" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Replace Photo</label>
+            <InputFile accept="@ImageRules.Accept" OnChange="OnPhotoSelected" class="form-control" />
+            @if (_photoError is not null)
+            {
+                <div class="text-danger">@_photoError</div>
+            }
+            @if (_hasPhoto)
+            {
+                <div class="form-check mt-2">
+                    <InputCheckbox @bind-Value="_removePhoto" class="form-check-input" id="removePhoto" />
+                    <label class="form-check-label" for="removePhoto">Remove the current photo</label>
+                </div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a class="btn btn-secondary" href="candidates">Cancel</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Candidate? _model;
+    private IReadOnlyList<Position> _positions = [];
+    private bool _loaded;
+    private bool _hasPhoto;
+    private ImageUpload? _photo;
+    private string? _photoError;
+    private bool _removePhoto;
+    private List<string> _errors = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _model = await Candidates.GetAsync(Id);
+        _hasPhoto = _model?.PhotoImageId is not null;
+        _positions = await Positions.ListAsync();
+        _loaded = true;
+    }
+
+    private async Task OnPhotoSelected(InputFileChangeEventArgs e)
+    {
+        _photoError = ImageRules.Validate(e.File.Name, e.File.ContentType, e.File.Size);
+        if (_photoError is not null)
+        {
+            _photo = null;
+            return;
+        }
+
+        await using var stream = e.File.OpenReadStream(ImageRules.MaxBytes);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        _photo = new ImageUpload(e.File.Name, e.File.ContentType, ms.ToArray());
+    }
+
+    private async Task SaveAsync()
+    {
+        _errors.Clear();
+        var result = await Candidates.UpdateAsync(Id, _model!, _photo, _removePhoto);
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("candidates");
+            return;
+        }
+
+        _errors = result.Errors.SelectMany(kv => kv.Value).ToList();
+        if (_errors.Count == 0)
+        {
+            _errors.Add("The candidate could not be saved.");
+        }
+    }
+}

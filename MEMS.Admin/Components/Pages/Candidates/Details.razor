@@ -1,0 +1,43 @@
+@page "/candidates/{Id:int}"
+@attribute [Authorize]
+@inject ICandidateService Candidates
+
+<PageTitle>Candidate - MEMS Admin</PageTitle>
+
+@if (_loaded && _c is null)
+{
+    <h1>Candidate</h1>
+    <p>Candidate not found.</p>
+    <a class="btn btn-secondary" href="candidates">Back</a>
+}
+else if (_c is not null)
+{
+    <h1>@_c.Name</h1>
+    <dl class="row">
+        <dt class="col-sm-3">Municipality</dt>
+        <dd class="col-sm-9">@_c.Municipality?.Name</dd>
+        <dt class="col-sm-3">Position</dt>
+        <dd class="col-sm-9">@_c.Position?.Name</dd>
+        <dt class="col-sm-3">Biography</dt>
+        <dd class="col-sm-9">@_c.Profile</dd>
+        <dt class="col-sm-3">Website</dt>
+        <dd class="col-sm-9">@_c.Website</dd>
+        <dt class="col-sm-3">Email</dt>
+        <dd class="col-sm-9">@_c.Email</dd>
+    </dl>
+    <a class="btn btn-secondary" href="candidates">Back</a>
+    <a class="btn btn-primary" href="@($"candidates/{_c.CandidateId}/edit")">Edit</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Candidate? _c;
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _c = await Candidates.GetAsync(Id);
+        _loaded = true;
+    }
+}
