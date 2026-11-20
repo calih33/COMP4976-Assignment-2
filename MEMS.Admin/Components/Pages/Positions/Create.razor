@@ -1,0 +1,89 @@
+@page "/positions/create"
+@attribute [Authorize]
+@inject IPositionService Positions
+@inject IMunicipalityService Municipalities
+@inject ITenantContext Tenant
+@inject NavigationManager Nav
+
+<PageTitle>New Position - MEMS Admin</PageTitle>
+
+<h1>New Position</h1>
+
+@if (_errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach (var error in _errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<EditForm Model="_model" OnValidSubmit="SaveAsync">
+    <DataAnnotationsValidator />
+
+    @if (Tenant.IsSuperAdmin)
+    {
+        <div class="mb-3">
+            <label class="form-label">Municipality</label>
+            <InputSelect @bind-Value="_model.MunicipalityId" class="form-select">
+                <option value="0">Choose a municipality...</option>
+                @foreach (var m in _municipalities)
+                {
+                    <option value="@m.MunicipalityId">@m.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => _model.MunicipalityId" />
+        </div>
+    }
+    <div class="mb-3">
+        <label class="form-label">Position</label>
+        <InputText @bind-Value="_model.Name" class="form-control" />
+        <ValidationMessage For="() => _model.Name" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Seats Available</label>
+        <InputNumber @bind-Value="_model.SeatsAvailable" class="form-control" />
+        <ValidationMessage For="() => _model.SeatsAvailable" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-secondary" href="positions">Cancel</a>
+</EditForm>
+
+@code {
+    private readonly Position _model = new();
+    private IReadOnlyList<Municipality> _municipalities = [];
+    private List<string> _errors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Tenant.IsSuperAdmin)
+        {
+            _municipalities = await Municipalities.ListAsync();
+        }
+        else if (Tenant.MunicipalityId is int id)
+        {
+            _model.MunicipalityId = id;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        _errors.Clear();
+        var result = await Positions.CreateAsync(_model);
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("positions");
+            return;
+        }
+
+        _errors = result.Errors.SelectMany(kv => kv.Value).ToList();
+        if (_errors.Count == 0)
+        {
+            _errors.Add("The position could not be saved.");
+        }
+    }
+}

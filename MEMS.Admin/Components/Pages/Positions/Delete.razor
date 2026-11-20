@@ -1,0 +1,59 @@
+@page "/positions/{Id:int}/delete"
+@attribute [Authorize]
+@inject IPositionService Positions
+@inject NavigationManager Nav
+
+<PageTitle>Delete Position - MEMS Admin</PageTitle>
+
+@if (_loaded && _p is null)
+{
+    <h1>Delete Position</h1>
+    <p>Position not found.</p>
+    <a class="btn btn-secondary" href="positions">Back</a>
+}
+else if (_p is not null)
+{
+    <h1>Delete @_p.Name</h1>
+
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    <p>This also deletes its @_p.Candidates.Count candidate(s). This cannot be undone.</p>
+    <dl class="row">
+        <dt class="col-sm-3">Municipality</dt>
+        <dd class="col-sm-9">@_p.Municipality?.Name</dd>
+        <dt class="col-sm-3">Seats Available</dt>
+        <dd class="col-sm-9">@_p.SeatsAvailable</dd>
+    </dl>
+
+    <button class="btn btn-danger" @onclick="DeleteAsync">Delete</button>
+    <a class="btn btn-secondary" href="positions">Cancel</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Position? _p;
+    private bool _loaded;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _p = await Positions.GetAsync(Id);
+        _loaded = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        var result = await Positions.DeleteAsync(Id);
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("positions");
+            return;
+        }
+
+        _error = "The position could not be deleted.";
+    }
+}

@@ -1,0 +1,44 @@
+@page "/positions"
+@attribute [Authorize]
+@inject IPositionService Positions
+
+<PageTitle>Positions - MEMS Admin</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Positions</h1>
+    <a class="btn btn-primary" href="positions/create">New position</a>
+</div>
+
+@if (_items is null)
+{
+    <p>Loading...</p>
+}
+else if (_items.Count == 0)
+{
+    <p>No positions yet.</p>
+}
+else
+{
+    <QuickGrid Items="@_items.AsQueryable()" Pagination="@_pagination" class="table table-striped">
+        <PropertyColumn Property="@(p => p.Municipality!.Name)" Title="Municipality" Sortable="true" />
+        <PropertyColumn Property="@(p => p.Name)" Title="Position" Sortable="true" />
+        <PropertyColumn Property="@(p => p.SeatsAvailable)" Title="Seats" Sortable="true" />
+        <TemplateColumn Title="Candidates">@context.Candidates.Count</TemplateColumn>
+        <TemplateColumn Title="Actions">
+            <a class="btn btn-sm btn-outline-secondary" href="@($"positions/{context.PositionId}")">Details</a>
+            <a class="btn btn-sm btn-outline-primary" href="@($"positions/{context.PositionId}/edit")">Edit</a>
+            <a class="btn btn-sm btn-outline-danger" href="@($"positions/{context.PositionId}/delete")">Delete</a>
+        </TemplateColumn>
+    </QuickGrid>
+    <Paginator State="@_pagination" />
+}
+
+@code {
+    private IReadOnlyList<Position>? _items;
+    private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Positions.ListAsync();
+    }
+}

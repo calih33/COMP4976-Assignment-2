@@ -1,0 +1,48 @@
+@page "/positions/{Id:int}"
+@attribute [Authorize]
+@inject IPositionService Positions
+
+<PageTitle>Position - MEMS Admin</PageTitle>
+
+@if (_loaded && _p is null)
+{
+    <h1>Position</h1>
+    <p>Position not found.</p>
+    <a class="btn btn-secondary" href="positions">Back</a>
+}
+else if (_p is not null)
+{
+    <h1>@_p.Name</h1>
+    <dl class="row">
+        <dt class="col-sm-3">Municipality</dt>
+        <dd class="col-sm-9">@_p.Municipality?.Name</dd>
+        <dt class="col-sm-3">Seats Available</dt>
+        <dd class="col-sm-9">@_p.SeatsAvailable</dd>
+        <dt class="col-sm-3">Candidates</dt>
+        <dd class="col-sm-9">@_p.Candidates.Count</dd>
+    </dl>
+    @if (_p.Candidates.Count > 0)
+    {
+        <ul>
+            @foreach (var candidate in _p.Candidates)
+            {
+                <li>@candidate.Name</li>
+            }
+        </ul>
+    }
+    <a class="btn btn-secondary" href="positions">Back</a>
+    <a class="btn btn-primary" href="@($"positions/{_p.PositionId}/edit")">Edit</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Position? _p;
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _p = await Positions.GetAsync(Id);
+        _loaded = true;
+    }
+}
