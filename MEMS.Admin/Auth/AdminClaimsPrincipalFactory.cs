@@ -6,8 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace MEMS.Admin.Auth;
 
-// Adds the "tenant_id" claim for a Municipality Admin so the signed-in cookie carries the same tenant
-// information the API puts in its JWT. Super Admins have no tenant, so no claim is added.
 public sealed class AdminClaimsPrincipalFactory(
     UserManager<ApplicationUser> userManager,
     RoleManager<IdentityRole> roleManager,

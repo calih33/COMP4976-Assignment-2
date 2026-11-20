@@ -15,7 +15,6 @@ public class Position
     [Display(Name = "Seats Available")]
     public int SeatsAvailable { get; set; } = 1;
 
-    // Tenant key. For Municipality Admins the service sets it from the tenant context, never from the form.
     [Range(1, int.MaxValue, ErrorMessage = "The Municipality field is required.")]
     [Display(Name = "Municipality")]
     public int MunicipalityId { get; set; }

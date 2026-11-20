@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace MEMS.Admin.Areas.Identity.Pages.Account;
 
-// Username login for the seeded admins ("super", "burnabyadmin", ...). No public registration.
 [AllowAnonymous]
 public class LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger) : PageModel
 {

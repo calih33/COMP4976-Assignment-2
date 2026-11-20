@@ -28,7 +28,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     .AddRoles<IdentityRole>()
     .AddDefaultTokenProviders();
 
-// Puts the admin's tenant id on the cookie as the "tenant_id" claim, same claim the API reads from the JWT.
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, AdminClaimsPrincipalFactory>();
 
 builder.Services.ConfigureApplicationCookie(options =>
