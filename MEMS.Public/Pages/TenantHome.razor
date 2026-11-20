@@ -1,0 +1,45 @@
+@page "/{Tenant}"
+@inject ApiClient Api
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_m is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Municipality not found</h1>
+    <p>No municipality uses the address "/@Tenant".</p>
+    <a class="btn btn-secondary" href="">Back to municipalities</a>
+}
+else
+{
+    <PageTitle>@_m.Name - Municipal Elections</PageTitle>
+    <div class="d-flex align-items-center gap-3 mb-3">
+        @if (!string.IsNullOrEmpty(_m.LogoUrl))
+        {
+            <img src="@_m.LogoUrl" alt="@_m.Name logo" style="height:64px" />
+        }
+        <h1 style="color:@_m.ThemeColor">@_m.Name</h1>
+    </div>
+    <p>@_m.Description</p>
+    <p><strong>Election date:</strong> @_m.ElectionDate.ToString("MMMM d, yyyy")</p>
+    <div class="d-flex gap-2">
+        <a class="btn btn-primary" href="@($"{Tenant}/positions")">Positions</a>
+        <a class="btn btn-primary" href="@($"{Tenant}/candidates")">Candidates</a>
+    </div>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+
+    private MunicipalityDto? _m;
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _m = await Api.GetMunicipalityAsync(Tenant);
+        _loaded = true;
+    }
+}

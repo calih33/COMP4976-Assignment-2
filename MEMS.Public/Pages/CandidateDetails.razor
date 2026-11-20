@@ -1,0 +1,52 @@
+@page "/{Tenant}/candidates/{Id:int}"
+@inject ApiClient Api
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_c is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Candidate not found</h1>
+    <a class="btn btn-secondary" href="@($"{Tenant}/candidates")">Back to candidates</a>
+}
+else
+{
+    <PageTitle>@_c.Name - Municipal Elections</PageTitle>
+    <h1>@_c.Name</h1>
+    <h5 class="text-muted mb-3">@_c.PositionName</h5>
+
+    @if (!string.IsNullOrEmpty(_c.PhotoUrl))
+    {
+        <img src="@_c.PhotoUrl" alt="@_c.Name" class="mb-3 rounded" style="max-height:260px" />
+    }
+
+    <p>@_c.Profile</p>
+
+    @if (!string.IsNullOrEmpty(_c.Website))
+    {
+        <p><strong>Website:</strong> <a href="@_c.Website" target="_blank">@_c.Website</a></p>
+    }
+    @if (!string.IsNullOrEmpty(_c.Email))
+    {
+        <p><strong>Email:</strong> @_c.Email</p>
+    }
+
+    <a class="btn btn-secondary" href="@($"{Tenant}/candidates")">Back to candidates</a>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+    [Parameter] public int Id { get; set; }
+
+    private CandidateDto? _c;
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _c = await Api.GetCandidateAsync(Tenant, Id);
+        _loaded = true;
+    }
+}

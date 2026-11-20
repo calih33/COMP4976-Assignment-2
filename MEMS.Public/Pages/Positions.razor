@@ -1,0 +1,64 @@
+@page "/{Tenant}/positions"
+@inject ApiClient Api
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_m is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Municipality not found</h1>
+    <a class="btn btn-secondary" href="">Back to municipalities</a>
+}
+else
+{
+    <PageTitle>Positions - @_m.Name</PageTitle>
+    <h1 style="color:@_m.ThemeColor">@_m.Name positions</h1>
+
+    @if (_positions.Count == 0)
+    {
+        <p>No positions yet.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr><th>Position</th><th>Seats</th><th>Candidates</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var p in _positions)
+                {
+                    <tr>
+                        <td>@p.Name</td>
+                        <td>@p.SeatsAvailable</td>
+                        <td>@p.CandidateCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-secondary" href="@Tenant">Back</a>
+    <a class="btn btn-primary" href="@($"{Tenant}/candidates")">View candidates</a>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+
+    private MunicipalityDto? _m;
+    private IReadOnlyList<PositionDto> _positions = [];
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _m = await Api.GetMunicipalityAsync(Tenant);
+        if (_m is not null)
+        {
+            _positions = await Api.GetPositionsAsync(Tenant);
+        }
+
+        _loaded = true;
+    }
+}

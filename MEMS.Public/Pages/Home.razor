@@ -1,7 +1,42 @@
 @page "/"
+@inject ApiClient Api
 
 <PageTitle>Municipal Elections</PageTitle>
 
 <h1>Municipal Elections</h1>
+<p>Choose your municipality to view its positions and candidates.</p>
 
-<p>Choose your municipality. The tenant picker and per-tenant pages are added in Phase 3c.</p>
+@if (_items is null)
+{
+    <p>Loading...</p>
+}
+else if (_items.Count == 0)
+{
+    <p>No municipalities are available.</p>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var m in _items)
+        {
+            <div class="col-sm-6 col-lg-4">
+                <a class="card h-100 text-decoration-none text-reset" href="@m.Slug">
+                    <div class="card-body">
+                        <h5 class="card-title" style="color:@m.ThemeColor">@m.Name</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">@m.Province</h6>
+                        <p class="card-text">@m.Description</p>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IReadOnlyList<MunicipalityDto>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Api.GetMunicipalitiesAsync();
+    }
+}

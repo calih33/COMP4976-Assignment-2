@@ -1,0 +1,99 @@
+@page "/{Tenant}/candidates"
+@inject ApiClient Api
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_m is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Municipality not found</h1>
+    <a class="btn btn-secondary" href="">Back to municipalities</a>
+}
+else
+{
+    <PageTitle>Candidates - @_m.Name</PageTitle>
+    <h1 style="color:@_m.ThemeColor">@_m.Name candidates</h1>
+
+    <div class="row g-2 mb-3">
+        <div class="col-sm-5">
+            <input class="form-control" placeholder="Search by name" @bind="_search" />
+        </div>
+        <div class="col-sm-4">
+            <select class="form-select" @bind="_positionFilter">
+                <option value="0">All positions</option>
+                @foreach (var p in _positions)
+                {
+                    <option value="@p.Id">@p.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-sm-3 d-grid">
+            <button class="btn btn-outline-primary" @onclick="ApplyAsync">Search</button>
+        </div>
+    </div>
+
+    @if (_candidates is null)
+    {
+        <p>Loading...</p>
+    }
+    else if (_candidates.Count == 0)
+    {
+        <p>No candidates found.</p>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var c in _candidates)
+            {
+                <div class="col-sm-6 col-lg-4">
+                    <a class="card h-100 text-decoration-none text-reset" href="@($"{Tenant}/candidates/{c.Id}")">
+                        @if (!string.IsNullOrEmpty(c.PhotoUrl))
+                        {
+                            <img src="@c.PhotoUrl" class="card-img-top" alt="@c.Name" style="height:200px;object-fit:cover" />
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@c.Name</h5>
+                            <h6 class="card-subtitle text-muted">@c.PositionName</h6>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+
+    <a class="btn btn-secondary mt-3" href="@Tenant">Back</a>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+
+    private MunicipalityDto? _m;
+    private IReadOnlyList<PositionDto> _positions = [];
+    private IReadOnlyList<CandidateDto>? _candidates;
+    private bool _loaded;
+    private string _search = string.Empty;
+    private int _positionFilter;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _m = await Api.GetMunicipalityAsync(Tenant);
+        if (_m is not null)
+        {
+            _positions = await Api.GetPositionsAsync(Tenant);
+            await ApplyAsync();
+        }
+
+        _loaded = true;
+    }
+
+    private async Task ApplyAsync()
+    {
+        _candidates = await Api.GetCandidatesAsync(
+            Tenant,
+            string.IsNullOrWhiteSpace(_search) ? null : _search,
+            _positionFilter == 0 ? null : _positionFilter);
+    }
+}
