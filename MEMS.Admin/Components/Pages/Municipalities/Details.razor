@@ -1,0 +1,45 @@
+@page "/municipalities/{Id:int}"
+@attribute [Authorize]
+@inject IMunicipalityService Municipalities
+
+<PageTitle>Municipality - MEMS Admin</PageTitle>
+
+@if (_loaded && _m is null)
+{
+    <h1>Municipality</h1>
+    <p>Municipality not found.</p>
+    <a class="btn btn-secondary" href="municipalities">Back</a>
+}
+else if (_m is not null)
+{
+    <h1>@_m.Name</h1>
+    <dl class="row">
+        <dt class="col-sm-3">URL Slug</dt>
+        <dd class="col-sm-9">@_m.Slug</dd>
+        <dt class="col-sm-3">Province</dt>
+        <dd class="col-sm-9">@_m.Province</dd>
+        <dt class="col-sm-3">Election Date</dt>
+        <dd class="col-sm-9">@_m.ElectionDate.ToString("yyyy-MM-dd")</dd>
+        <dt class="col-sm-3">Theme Colour</dt>
+        <dd class="col-sm-9"><span class="badge" style="background-color:@_m.ThemeColor">@_m.ThemeColor</span></dd>
+        <dt class="col-sm-3">Description</dt>
+        <dd class="col-sm-9">@_m.Description</dd>
+        <dt class="col-sm-3">Positions</dt>
+        <dd class="col-sm-9">@_m.Positions.Count</dd>
+    </dl>
+    <a class="btn btn-secondary" href="municipalities">Back</a>
+    <a class="btn btn-primary" href="@($"municipalities/{_m.MunicipalityId}/edit")">Edit</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Municipality? _m;
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _m = await Municipalities.GetAsync(Id);
+        _loaded = true;
+    }
+}

@@ -1,0 +1,59 @@
+@page "/municipalities/{Id:int}/delete"
+@attribute [Authorize(Roles = AppRoles.SuperAdmin)]
+@inject IMunicipalityService Municipalities
+@inject NavigationManager Nav
+
+<PageTitle>Delete Municipality - MEMS Admin</PageTitle>
+
+@if (_loaded && _m is null)
+{
+    <h1>Delete Municipality</h1>
+    <p>Municipality not found.</p>
+    <a class="btn btn-secondary" href="municipalities">Back</a>
+}
+else if (_m is not null)
+{
+    <h1>Delete @_m.Name</h1>
+
+    @if (_error is not null)
+    {
+        <div class="alert alert-danger">@_error</div>
+    }
+
+    <p>This also deletes its positions, candidates and admin accounts. This cannot be undone.</p>
+    <dl class="row">
+        <dt class="col-sm-3">URL Slug</dt>
+        <dd class="col-sm-9">@_m.Slug</dd>
+        <dt class="col-sm-3">Positions</dt>
+        <dd class="col-sm-9">@_m.Positions.Count</dd>
+    </dl>
+
+    <button class="btn btn-danger" @onclick="DeleteAsync">Delete</button>
+    <a class="btn btn-secondary" href="municipalities">Cancel</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Municipality? _m;
+    private bool _loaded;
+    private string? _error;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _m = await Municipalities.GetAsync(Id);
+        _loaded = true;
+    }
+
+    private async Task DeleteAsync()
+    {
+        var result = await Municipalities.DeleteAsync(Id);
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("municipalities");
+            return;
+        }
+
+        _error = "The municipality could not be deleted.";
+    }
+}

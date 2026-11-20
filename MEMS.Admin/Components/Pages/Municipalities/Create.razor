@@ -1,0 +1,105 @@
+@page "/municipalities/create"
+@attribute [Authorize(Roles = AppRoles.SuperAdmin)]
+@inject IMunicipalityService Municipalities
+@inject NavigationManager Nav
+
+<PageTitle>New Municipality - MEMS Admin</PageTitle>
+
+<h1>New Municipality</h1>
+
+@if (_errors.Count > 0)
+{
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach (var error in _errors)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<EditForm Model="_model" OnValidSubmit="SaveAsync">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <InputText @bind-Value="_model.Name" class="form-control" />
+        <ValidationMessage For="() => _model.Name" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">URL Slug</label>
+        <InputText @bind-Value="_model.Slug" class="form-control" />
+        <ValidationMessage For="() => _model.Slug" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Province</label>
+        <InputText @bind-Value="_model.Province" class="form-control" />
+        <ValidationMessage For="() => _model.Province" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Election Date</label>
+        <InputDate @bind-Value="_model.ElectionDate" class="form-control" />
+        <ValidationMessage For="() => _model.ElectionDate" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Theme Colour</label>
+        <InputText @bind-Value="_model.ThemeColor" class="form-control" />
+        <ValidationMessage For="() => _model.ThemeColor" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Description</label>
+        <InputTextArea @bind-Value="_model.Description" class="form-control" rows="3" />
+        <ValidationMessage For="() => _model.Description" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Logo</label>
+        <InputFile accept="@ImageRules.Accept" OnChange="OnLogoSelected" class="form-control" />
+        @if (_logoError is not null)
+        {
+            <div class="text-danger">@_logoError</div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-secondary" href="municipalities">Cancel</a>
+</EditForm>
+
+@code {
+    private readonly Municipality _model = new();
+    private ImageUpload? _logo;
+    private string? _logoError;
+    private List<string> _errors = new();
+
+    private async Task OnLogoSelected(InputFileChangeEventArgs e)
+    {
+        _logoError = ImageRules.Validate(e.File.Name, e.File.ContentType, e.File.Size);
+        if (_logoError is not null)
+        {
+            _logo = null;
+            return;
+        }
+
+        await using var stream = e.File.OpenReadStream(ImageRules.MaxBytes);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        _logo = new ImageUpload(e.File.Name, e.File.ContentType, ms.ToArray());
+    }
+
+    private async Task SaveAsync()
+    {
+        _errors.Clear();
+        var result = await Municipalities.CreateAsync(_model, _logo);
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("municipalities");
+            return;
+        }
+
+        _errors = result.Errors.SelectMany(kv => kv.Value).ToList();
+        if (_errors.Count == 0)
+        {
+            _errors.Add("The municipality could not be saved.");
+        }
+    }
+}

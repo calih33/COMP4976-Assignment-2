@@ -1,0 +1,49 @@
+@page "/municipalities"
+@attribute [Authorize]
+@inject IMunicipalityService Municipalities
+
+<PageTitle>Municipalities - MEMS Admin</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Municipalities</h1>
+    <AuthorizeView Roles="@AppRoles.SuperAdmin">
+        <a class="btn btn-primary" href="municipalities/create">New municipality</a>
+    </AuthorizeView>
+</div>
+
+@if (_items is null)
+{
+    <p>Loading...</p>
+}
+else if (_items.Count == 0)
+{
+    <p>No municipalities yet.</p>
+}
+else
+{
+    <QuickGrid Items="@_items.AsQueryable()" Pagination="@_pagination" class="table table-striped">
+        <PropertyColumn Property="@(m => m.Name)" Sortable="true" />
+        <PropertyColumn Property="@(m => m.Slug)" Title="Slug" Sortable="true" />
+        <PropertyColumn Property="@(m => m.Province)" Sortable="true" />
+        <PropertyColumn Property="@(m => m.ElectionDate)" Title="Election Date" Sortable="true" />
+        <TemplateColumn Title="Positions">@context.Positions.Count</TemplateColumn>
+        <TemplateColumn Title="Actions">
+            <a class="btn btn-sm btn-outline-secondary" href="@($"municipalities/{context.MunicipalityId}")">Details</a>
+            <a class="btn btn-sm btn-outline-primary" href="@($"municipalities/{context.MunicipalityId}/edit")">Edit</a>
+            <AuthorizeView Roles="@AppRoles.SuperAdmin" Context="auth">
+                <a class="btn btn-sm btn-outline-danger" href="@($"municipalities/{context.MunicipalityId}/delete")">Delete</a>
+            </AuthorizeView>
+        </TemplateColumn>
+    </QuickGrid>
+    <Paginator State="@_pagination" />
+}
+
+@code {
+    private IReadOnlyList<Municipality>? _items;
+    private readonly PaginationState _pagination = new() { ItemsPerPage = 10 };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _items = await Municipalities.ListAsync();
+    }
+}

@@ -1,8 +1,50 @@
 @page "/"
 @attribute [Authorize]
+@inject IDashboardService Dashboard
 
-<PageTitle>MEMS Admin</PageTitle>
+<PageTitle>Dashboard - MEMS Admin</PageTitle>
 
-<h1>MEMS Administration</h1>
+<h1>Dashboard</h1>
 
-<p>Dashboard, tenant management and CRUD pages are added in Phase 3b.</p>
+@if (_counts is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row g-3 mt-2">
+        <div class="col-sm-6 col-lg-4">
+            <div class="card text-bg-primary h-100">
+                <div class="card-body">
+                    <div class="display-5">@_counts.Municipalities</div>
+                    <div class="card-text">Municipalities</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="card text-bg-success h-100">
+                <div class="card-body">
+                    <div class="display-5">@_counts.Positions</div>
+                    <div class="card-text">Positions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+            <div class="card text-bg-info h-100">
+                <div class="card-body">
+                    <div class="display-5">@_counts.Candidates</div>
+                    <div class="card-text">Candidates</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private DashboardCounts? _counts;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _counts = await Dashboard.GetCountsAsync();
+    }
+}
