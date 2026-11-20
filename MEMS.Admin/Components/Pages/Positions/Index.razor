@@ -19,6 +19,7 @@ else if (_items.Count == 0)
 }
 else
 {
+    <div class="table-responsive">
     <QuickGrid Items="@_items.AsQueryable()" Pagination="@_pagination" class="table table-striped">
         <PropertyColumn Property="@(p => p.Municipality!.Name)" Title="Municipality" Sortable="true" />
         <PropertyColumn Property="@(p => p.Name)" Title="Position" Sortable="true" />
@@ -30,6 +31,7 @@ else
             <a class="btn btn-sm btn-outline-danger" href="@($"positions/{context.PositionId}/delete")">Delete</a>
         </TemplateColumn>
     </QuickGrid>
+    </div>
     <Paginator State="@_pagination" />
 }
 

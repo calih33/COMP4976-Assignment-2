@@ -21,6 +21,7 @@ else if (_items.Count == 0)
 }
 else
 {
+    <div class="table-responsive">
     <QuickGrid Items="@_items.AsQueryable()" Pagination="@_pagination" class="table table-striped">
         <PropertyColumn Property="@(m => m.Name)" Sortable="true" />
         <PropertyColumn Property="@(m => m.Slug)" Title="Slug" Sortable="true" />
@@ -35,6 +36,7 @@ else
             </AuthorizeView>
         </TemplateColumn>
     </QuickGrid>
+    </div>
     <Paginator State="@_pagination" />
 }
 

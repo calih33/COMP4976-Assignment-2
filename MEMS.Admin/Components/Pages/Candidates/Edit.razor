@@ -63,7 +63,11 @@ else if (_model is not null)
             <ValidationMessage For="() => _model.Email" />
         </div>
         <div class="mb-3">
-            <label class="form-label">Replace Photo</label>
+            <label class="form-label">Photo</label>
+            @if (_hasPhoto)
+            {
+                <div><img src="images/@_model.PhotoImageId" alt="current photo" class="mb-2" style="max-height:80px" /></div>
+            }
             <InputFile accept="@ImageRules.Accept" OnChange="OnPhotoSelected" class="form-control" />
             @if (_photoError is not null)
             {

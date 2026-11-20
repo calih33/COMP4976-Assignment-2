@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using MEMS;
 using MEMS.Admin.Auth;
 using MEMS.Admin.Components;
 using MEMS.Data;
+using MEMS.Data.Services;
+using MEMS.Data.Tenancy;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
@@ -66,6 +69,17 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.MapRazorPages();
+
+app.MapGet("/images/{id:int}", async (int id, HttpContext http, TenantContext tenant, IImageService images, CancellationToken ct) =>
+{
+    var isSuperAdmin = http.User.IsInRole(AppRoles.SuperAdmin);
+    int? tenantId = int.TryParse(http.User.FindFirstValue(AppRoles.TenantClaim), out var t) ? t : null;
+    tenant.SetAdmin(isSuperAdmin ? null : tenantId, isSuperAdmin);
+
+    return await images.GetAsync(id, ct) is { } image
+        ? Results.File(image.Data, image.ContentType)
+        : Results.NotFound();
+}).RequireAuthorization();
 
 app.MapDefaultEndpoints();
 

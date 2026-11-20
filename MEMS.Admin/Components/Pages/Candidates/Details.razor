@@ -13,6 +13,10 @@
 else if (_c is not null)
 {
     <h1>@_c.Name</h1>
+    @if (_c.PhotoImageId is not null)
+    {
+        <img src="images/@_c.PhotoImageId" alt="@_c.Name" class="mb-3 rounded" style="max-height:200px" />
+    }
     <dl class="row">
         <dt class="col-sm-3">Municipality</dt>
         <dd class="col-sm-9">@_c.Municipality?.Name</dd>

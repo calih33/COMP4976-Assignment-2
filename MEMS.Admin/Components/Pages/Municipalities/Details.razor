@@ -13,6 +13,10 @@
 else if (_m is not null)
 {
     <h1>@_m.Name</h1>
+    @if (_m.LogoImageId is not null)
+    {
+        <img src="images/@_m.LogoImageId" alt="@_m.Name logo" class="mb-3" style="max-height:120px" />
+    }
     <dl class="row">
         <dt class="col-sm-3">URL Slug</dt>
         <dd class="col-sm-9">@_m.Slug</dd>

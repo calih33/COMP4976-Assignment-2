@@ -61,7 +61,11 @@ else if (_model is not null)
             <ValidationMessage For="() => _model.Description" />
         </div>
         <div class="mb-3">
-            <label class="form-label">Replace Logo</label>
+            <label class="form-label">Logo</label>
+            @if (_hasLogo)
+            {
+                <div><img src="images/@_model.LogoImageId" alt="current logo" class="mb-2" style="max-height:80px" /></div>
+            }
             <InputFile accept="@ImageRules.Accept" OnChange="OnLogoSelected" class="form-control" />
             @if (_logoError is not null)
             {
