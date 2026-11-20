@@ -14,4 +14,18 @@
             </NavLink>
         </div>
     </nav>
+
+    <AuthorizeView>
+        <Authorized>
+            <div class="nav-item px-3 mt-3 text-white-50 small">
+                Signed in as @context.User.Identity?.Name
+            </div>
+            <div class="nav-item px-3">
+                <form action="Identity/Account/Logout" method="post">
+                    <AntiforgeryToken />
+                    <button type="submit" class="nav-link btn btn-link text-start">Log out</button>
+                </form>
+            </div>
+        </Authorized>
+    </AuthorizeView>
 </div>

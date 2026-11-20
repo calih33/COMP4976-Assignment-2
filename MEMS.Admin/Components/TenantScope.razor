@@ -1,0 +1,29 @@
+@inject TenantContext Tenant
+
+@if (_ready)
+{
+    @ChildContent
+}
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthState { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private bool _ready;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (AuthState is not null)
+        {
+            var user = (await AuthState).User;
+            if (user.Identity?.IsAuthenticated == true)
+            {
+                var isSuperAdmin = user.IsInRole(AppRoles.SuperAdmin);
+                int? tenantId = int.TryParse(user.FindFirst(AppRoles.TenantClaim)?.Value, out var id) ? id : null;
+                Tenant.SetAdmin(isSuperAdmin ? null : tenantId, isSuperAdmin);
+            }
+        }
+
+        _ready = true;
+    }
+}
