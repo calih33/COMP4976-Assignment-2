@@ -5,6 +5,8 @@ using MEMS.Admin.Components;
 using MEMS.Data;
 using MEMS.Data.Services;
 using MEMS.Data.Tenancy;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Identity;
@@ -38,6 +40,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Identity/Account/Login";
     options.LogoutPath = "/Identity/Account/Logout";
     options.AccessDeniedPath = "/Identity/Account/Login";
+
+    static Task Relative(RedirectContext<CookieAuthenticationOptions> context)
+    {
+        var target = Uri.TryCreate(context.RedirectUri, UriKind.Absolute, out var abs) ? abs.PathAndQuery : context.RedirectUri;
+        context.Response.Redirect(target);
+        return Task.CompletedTask;
+    }
+
+    options.Events.OnRedirectToLogin = Relative;
+    options.Events.OnRedirectToLogout = Relative;
+    options.Events.OnRedirectToAccessDenied = Relative;
 });
 
 builder.Services.AddRazorComponents()
@@ -67,7 +80,8 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+    .AddInteractiveServerRenderMode()
+    .RequireAuthorization();
 app.MapRazorPages();
 
 app.MapGet("/images/{id:int}", async (int id, HttpContext http, TenantContext tenant, IImageService images, CancellationToken ct) =>
