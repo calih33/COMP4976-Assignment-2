@@ -1,0 +1,74 @@
+@page "/{Tenant}/guide/print"
+@inject ApiClient Api
+@inject GuideStorage Guide
+@inject IJSRuntime JS
+
+<style>
+    @@media print {
+        .sidebar, .top-row, .no-print { display: none !important; }
+        main, .content { margin: 0 !important; padding: 0 !important; }
+    }
+</style>
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_m is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Municipality not found</h1>
+}
+else
+{
+    <PageTitle>Voting guide - @_m.Name</PageTitle>
+    <button class="btn btn-primary no-print mb-3" @onclick="PrintAsync">Print this guide</button>
+
+    <h1>@_m.Name — Voting Guide</h1>
+    <p><strong>Election date:</strong> @_m.ElectionDate.ToString("MMMM d, yyyy")</p>
+
+    @if (_selected.Count == 0)
+    {
+        <p>No candidates selected.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr><th>Position</th><th>Candidate</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var c in _selected)
+                {
+                    <tr><td>@c.PositionName</td><td>@c.Name</td></tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <p class="text-muted">Printed: @DateTime.Now.ToString("MMMM d, yyyy h:mm tt")</p>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+
+    private MunicipalityDto? _m;
+    private List<CandidateDto> _selected = new();
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _m = await Api.GetMunicipalityAsync(Tenant);
+        if (_m is not null)
+        {
+            var ids = (await Guide.GetIdsAsync(Tenant)).ToHashSet();
+            var all = await Api.GetCandidatesAsync(Tenant);
+            _selected = all.Where(c => ids.Contains(c.Id)).OrderBy(c => c.PositionName).ThenBy(c => c.Name).ToList();
+        }
+
+        _loaded = true;
+    }
+
+    private async Task PrintAsync() => await JS.InvokeVoidAsync("window.print");
+}

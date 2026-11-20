@@ -1,0 +1,93 @@
+@page "/{Tenant}/guide"
+@inject ApiClient Api
+@inject GuideStorage Guide
+
+@if (!_loaded)
+{
+    <p>Loading...</p>
+}
+else if (_m is null)
+{
+    <PageTitle>Not found - Municipal Elections</PageTitle>
+    <h1>Municipality not found</h1>
+    <a class="btn btn-secondary" href="">Back to municipalities</a>
+}
+else
+{
+    <PageTitle>Voting guide - @_m.Name</PageTitle>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h1 style="color:@_m.ThemeColor">My voting guide — @_m.Name</h1>
+        @if (_selected.Count > 0)
+        {
+            <div class="d-flex gap-2">
+                <a class="btn btn-primary" href="@($"{Tenant}/guide/print")">Print</a>
+                <button class="btn btn-outline-danger" @onclick="ClearAsync">Clear all</button>
+            </div>
+        }
+    </div>
+    <p class="text-muted">Your selections are kept only in this browser and are never sent to the server.</p>
+
+    @if (_selected.Count == 0)
+    {
+        <p>Your guide is empty. Add candidates from the <a href="@($"{Tenant}/candidates")">candidates</a> page.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr><th>Position</th><th>Candidate</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var c in _selected)
+                {
+                    <tr>
+                        <td>@c.PositionName</td>
+                        <td>@c.Name</td>
+                        <td><button class="btn btn-sm btn-outline-danger" @onclick="() => RemoveAsync(c.Id)">Remove</button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-secondary" href="@($"{Tenant}/candidates")">Back to candidates</a>
+}
+
+@code {
+    [Parameter] public string Tenant { get; set; } = string.Empty;
+
+    private MunicipalityDto? _m;
+    private List<CandidateDto> _selected = new();
+    private bool _loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _loaded = false;
+        _m = await Api.GetMunicipalityAsync(Tenant);
+        if (_m is not null)
+        {
+            await LoadSelectedAsync();
+        }
+
+        _loaded = true;
+    }
+
+    private async Task LoadSelectedAsync()
+    {
+        var ids = (await Guide.GetIdsAsync(Tenant)).ToHashSet();
+        var all = await Api.GetCandidatesAsync(Tenant);
+        _selected = all.Where(c => ids.Contains(c.Id)).OrderBy(c => c.PositionName).ThenBy(c => c.Name).ToList();
+    }
+
+    private async Task RemoveAsync(int id)
+    {
+        await Guide.RemoveAsync(Tenant, id);
+        _selected.RemoveAll(c => c.Id == id);
+    }
+
+    private async Task ClearAsync()
+    {
+        await Guide.ClearAsync(Tenant);
+        _selected.Clear();
+    }
+}
